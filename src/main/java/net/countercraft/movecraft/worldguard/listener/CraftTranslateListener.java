@@ -18,7 +18,7 @@ public class CraftTranslateListener implements Listener {
             return;
 
         for(MovecraftLocation ml : e.getNewHitBox().difference(e.getOldHitBox())) {
-            if(!MovecraftWorldGuard.getInstance().getWorldGuardPlugin().canBuild(e.getCraft().getNotificationPlayer(), ml.toBukkit(e.getWorld()))) {
+            if(!MovecraftWorldGuard.getInstance().getWGUtils().canTranslate(e.getCraft().getNotificationPlayer(), ml.toBukkit(e.getWorld()))) {
                 e.setCancelled(true);
                 e.setFailMessage(String.format(I18nSupport.getInternationalisedString( "Translation - WorldGuard - Not Permitted To Build" ) + " @ %d,%d,%d", ml.getX(), ml.getY(), ml.getZ()));
                 return;

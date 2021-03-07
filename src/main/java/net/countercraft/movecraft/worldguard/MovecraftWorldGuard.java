@@ -1,10 +1,11 @@
 package net.countercraft.movecraft.worldguard;
 
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import net.countercraft.movecraft.worldguard.config.Config;
 import net.countercraft.movecraft.worldguard.listener.CraftRotateListener;
 import net.countercraft.movecraft.worldguard.listener.CraftTranslateListener;
+import net.countercraft.movecraft.worldguard.listener.ExplosionListener;
 import net.countercraft.movecraft.worldguard.localisation.I18nSupport;
+import net.countercraft.movecraft.worldguard.utils.WorldGuardUtils;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -18,7 +19,7 @@ public final class MovecraftWorldGuard extends JavaPlugin {
         return instance;
     }
 
-    private WorldGuardPlugin worldGuardPlugin;
+    private WorldGuardUtils wgUtils;
 
     @Override
     public void onEnable() {
@@ -35,7 +36,8 @@ public final class MovecraftWorldGuard extends JavaPlugin {
         I18nSupport.init();
 
         Plugin wgPlugin = getServer().getPluginManager().getPlugin("WorldGuard");
-        if(wgPlugin == null || !(wgPlugin instanceof  WorldGuardPlugin)) {
+        wgUtils = new WorldGuardUtils();
+        if(!wgUtils.init(wgPlugin)) {
             getLogger().log(Level.SEVERE, I18nSupport.getInternationalisedString("Startup - WG Not Found"));
             getServer().shutdown();
         }
@@ -43,20 +45,20 @@ public final class MovecraftWorldGuard extends JavaPlugin {
         Config.WorldGuardBlockMoveOnBuildPerm = getConfig().getBoolean("WorldGuardBlockMoveOnBuildPerm", true);
         Config.WorldGuardBlockSinkOnPVPPerm = getConfig().getBoolean("WorldGuardBlockSinkOnPVPPerm", true);
         getLogger().log(Level.INFO, "Settings: WorldGuardBlockMoveOnBuildPerm - {0}, WorldGuardBlockSinkOnPVPPerm - {1}", new Object[]{Config.WorldGuardBlockMoveOnBuildPerm, Config.WorldGuardBlockSinkOnPVPPerm});
-        worldGuardPlugin = (WorldGuardPlugin) wgPlugin;
 
         getServer().getPluginManager().registerEvents(new CraftRotateListener(), this);
         getServer().getPluginManager().registerEvents(new CraftTranslateListener(), this);
+        getServer().getPluginManager().registerEvents(new ExplosionListener(), this);
 
         instance = this;
     }
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+
     }
 
-    public WorldGuardPlugin getWorldGuardPlugin() {
-        return worldGuardPlugin;
+    public WorldGuardUtils getWGUtils() {
+        return wgUtils;
     }
 }
