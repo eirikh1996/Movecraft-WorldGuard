@@ -84,6 +84,13 @@
             <version>1.10.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>net.countercraft.movecraft</groupId>
+            <artifactId>Movecraft</artifactId>
+            <version>7.0.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../Movecraft/target/Movecraft.jar</systemPath>
+        </dependency>
         <!--WorldGuard-->
         <dependency>
             <groupId>com.sk89q</groupId>
