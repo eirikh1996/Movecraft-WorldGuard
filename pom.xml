@@ -19,6 +19,7 @@
     <url>https://github.com/APDevTeam/Movecraft-WorldGuard</url>
 
     <build>
+        <finalName>Movecraft-WorldGuard</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

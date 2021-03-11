@@ -7,6 +7,7 @@ import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -17,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Set;
 
 public class WorldGuardUtils {
     private WorldGuardPlugin wgPlugin;
@@ -45,6 +47,15 @@ public class WorldGuardUtils {
         ApplicableRegionSet set = getApplicableRegions(loc);
         for(ProtectedRegion r : set) {
             if(r.getFlag(DefaultFlag.OTHER_EXPLOSION) == StateFlag.State.DENY)
+                return false;
+        }
+        return true;
+    }
+
+    public boolean allowsPVP(Location loc) {
+        ApplicableRegionSet set = getApplicableRegions(loc);
+        for(ProtectedRegion r : set) {
+            if(r.getFlag(DefaultFlag.PVP) == StateFlag.State.DENY)
                 return false;
         }
         return true;

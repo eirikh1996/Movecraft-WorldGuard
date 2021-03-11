@@ -2,6 +2,7 @@ package net.countercraft.movecraft.worldguard;
 
 import net.countercraft.movecraft.worldguard.config.Config;
 import net.countercraft.movecraft.worldguard.listener.CraftRotateListener;
+import net.countercraft.movecraft.worldguard.listener.CraftSinkListener;
 import net.countercraft.movecraft.worldguard.listener.CraftTranslateListener;
 import net.countercraft.movecraft.worldguard.listener.ExplosionListener;
 import net.countercraft.movecraft.worldguard.localisation.I18nSupport;
@@ -23,12 +24,14 @@ public final class MovecraftWorldGuard extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        instance = this;
+
         saveDefaultConfig();
 
         // TODO other languages
         String[] languages = {"en"};
         for (String s : languages) {
-            if (!new File(getDataFolder()  + "/localisation/movecraftworldguardlang__"+ s +".properties").exists()) {
+            if (!new File(getDataFolder()  + "/localisation/movecraftworldguardlang_"+ s +".properties").exists()) {
                 saveResource("localisation/movecraftworldguardlang_"+ s +".properties", false);
             }
         }
@@ -47,10 +50,9 @@ public final class MovecraftWorldGuard extends JavaPlugin {
         getLogger().log(Level.INFO, "Settings: WorldGuardBlockMoveOnBuildPerm - {0}, WorldGuardBlockSinkOnPVPPerm - {1}", new Object[]{Config.WorldGuardBlockMoveOnBuildPerm, Config.WorldGuardBlockSinkOnPVPPerm});
 
         getServer().getPluginManager().registerEvents(new CraftRotateListener(), this);
+        getServer().getPluginManager().registerEvents(new CraftSinkListener(), this);
         getServer().getPluginManager().registerEvents(new CraftTranslateListener(), this);
         getServer().getPluginManager().registerEvents(new ExplosionListener(), this);
-
-        instance = this;
     }
 
     @Override

@@ -20,7 +20,7 @@ public class CraftRotateListener implements Listener {
         for(MovecraftLocation ml : e.getNewHitBox()){
             if(!MovecraftWorldGuard.getInstance().getWGUtils().canRotate(e.getCraft().getNotificationPlayer(), ml.toBukkit(e.getCraft().getW()))) {
                 e.setCancelled(true);
-                e.setFailMessage(String.format(I18nSupport.getInternationalisedString("Rotation - WorldGuard - Not Permitted To Build" ) + " @ %d,%d,%d", ml.getX(), ml.getY(), ml.getZ()));
+                e.setFailMessage(String.format(I18nSupport.getInternationalisedString("Rotation - WorldGuard - Not Permitted To Build") + " @ %d,%d,%d", ml.getX(), ml.getY(), ml.getZ()));
                 return;
             }
         }
