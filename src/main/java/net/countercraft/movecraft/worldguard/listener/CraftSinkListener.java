@@ -1,7 +1,5 @@
 package net.countercraft.movecraft.worldguard.listener;
 
-import net.countercraft.movecraft.MovecraftLocation;
-import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.events.CraftSinkEvent;
 import net.countercraft.movecraft.worldguard.MovecraftWorldGuard;
 import net.countercraft.movecraft.worldguard.config.Config;
@@ -16,7 +14,7 @@ public class CraftSinkListener implements Listener {
         if(!Config.WorldGuardBlockSinkOnPVPPerm)
             return;
 
-        if(craftAllowsPVP(e.getCraft()))
+        if(MovecraftWorldGuard.getInstance().getWGUtils().isPVPAllowed(e.getCraft().getW(), e.getCraft().getHitBox()))
             return;
 
         e.setCancelled(true);
@@ -25,13 +23,5 @@ public class CraftSinkListener implements Listener {
             return;
 
         p.sendMessage(I18nSupport.getInternationalisedString("Player - Craft should sink but PVP is not allowed in this WorldGuard region" ));
-    }
-
-    private boolean craftAllowsPVP(Craft c) {
-        for(MovecraftLocation ml : c.getHitBox()) {
-            if(!MovecraftWorldGuard.getInstance().getWGUtils().allowsPVP(ml.toBukkit(c.getW())))
-                return false;
-        }
-        return true;
     }
 }

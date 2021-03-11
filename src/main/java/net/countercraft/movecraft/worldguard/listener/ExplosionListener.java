@@ -8,7 +8,7 @@ import org.bukkit.event.Listener;
 public class ExplosionListener implements Listener {
     @EventHandler
     public void onExplosion(ExplosionEvent e) {
-        if(MovecraftWorldGuard.getInstance().getWGUtils().allowsOtherExplosion(e.getExplosionLocation()))
+        if(MovecraftWorldGuard.getInstance().getWGUtils().isOtherExplosionAllowed(e.getExplosionLocation()))
             return;
 
         e.setCancelled(true);

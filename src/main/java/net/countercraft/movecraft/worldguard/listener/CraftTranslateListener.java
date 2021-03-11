@@ -17,12 +17,18 @@ public class CraftTranslateListener implements Listener {
         if(e.getCraft().getNotificationPlayer() == null)
             return;
 
-        for(MovecraftLocation ml : e.getNewHitBox().difference(e.getOldHitBox())) {
+        if(MovecraftWorldGuard.getInstance().getWGUtils().canTranslate(e.getCraft().getNotificationPlayer(), e.getCraft().getW(), e.getNewHitBox()))
+            return;
+
+        MovecraftLocation location = e.getCraft().getHitBox().getMidPoint();
+        for(MovecraftLocation ml : e.getNewHitBox()) {
             if(!MovecraftWorldGuard.getInstance().getWGUtils().canTranslate(e.getCraft().getNotificationPlayer(), ml.toBukkit(e.getWorld()))) {
-                e.setCancelled(true);
-                e.setFailMessage(String.format(I18nSupport.getInternationalisedString( "Translation - WorldGuard - Not Permitted To Build" ) + " @ %d,%d,%d", ml.getX(), ml.getY(), ml.getZ()));
-                return;
+                location = ml;
+                break;
             }
         }
+
+        e.setCancelled(true);
+        e.setFailMessage(String.format(I18nSupport.getInternationalisedString( "Translation - WorldGuard - Not Permitted To Build" ) + " @ %d,%d,%d", location.getX(), location.getY(), location.getZ()));
     }
 }
