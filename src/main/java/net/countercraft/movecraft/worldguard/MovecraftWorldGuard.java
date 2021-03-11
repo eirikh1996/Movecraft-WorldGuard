@@ -1,10 +1,8 @@
 package net.countercraft.movecraft.worldguard;
 
+import net.countercraft.movecraft.combat.movecraftcombat.MovecraftCombat;
 import net.countercraft.movecraft.worldguard.config.Config;
-import net.countercraft.movecraft.worldguard.listener.CraftRotateListener;
-import net.countercraft.movecraft.worldguard.listener.CraftSinkListener;
-import net.countercraft.movecraft.worldguard.listener.CraftTranslateListener;
-import net.countercraft.movecraft.worldguard.listener.ExplosionListener;
+import net.countercraft.movecraft.worldguard.listener.*;
 import net.countercraft.movecraft.worldguard.localisation.I18nSupport;
 import net.countercraft.movecraft.worldguard.utils.WorldGuardUtils;
 import org.bukkit.plugin.Plugin;
@@ -48,6 +46,10 @@ public final class MovecraftWorldGuard extends JavaPlugin {
         Config.WorldGuardBlockMoveOnBuildPerm = getConfig().getBoolean("WorldGuardBlockMoveOnBuildPerm", true);
         Config.WorldGuardBlockSinkOnPVPPerm = getConfig().getBoolean("WorldGuardBlockSinkOnPVPPerm", true);
         getLogger().log(Level.INFO, "Settings: WorldGuardBlockMoveOnBuildPerm - {0}, WorldGuardBlockSinkOnPVPPerm - {1}", new Object[]{Config.WorldGuardBlockMoveOnBuildPerm, Config.WorldGuardBlockSinkOnPVPPerm});
+
+        if(MovecraftCombat.getInstance() != null) {
+            getServer().getPluginManager().registerEvents(new CombatReleaseListener(), this);
+        }
 
         getServer().getPluginManager().registerEvents(new CraftRotateListener(), this);
         getServer().getPluginManager().registerEvents(new CraftSinkListener(), this);

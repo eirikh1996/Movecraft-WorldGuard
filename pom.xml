@@ -93,6 +93,14 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/../Movecraft/target/Movecraft.jar</systemPath>
         </dependency>
+        <!--Movecraft-Combat-->
+        <dependency>
+            <groupId>net.countercraft.movecraft.combat</groupId>
+            <artifactId>MovecraftCombat</artifactId>
+            <version>LATEST</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../MC-Combat/target/Movecraft-Combat.jar</systemPath>
+        </dependency>
         <!--WorldGuard-->
         <dependency>
             <groupId>com.sk89q</groupId>
