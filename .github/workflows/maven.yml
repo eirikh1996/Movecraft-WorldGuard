@@ -1,0 +1,79 @@
+name: Java CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Movecraft-WorldGuard
+      uses: actions/checkout@v2
+      with:
+        path: Movecraft-WorldGuard
+    - name: Checkout Movecraft
+      uses: actions/checkout@v2
+      with:
+        repository: 'TylerS1066/Movecraft'
+        path: Movecraft
+        ref: 'wg2'
+    - name: Checkout Movecraft-Combat
+      uses: actions/checkout@v2
+      with:
+        repository: 'APDevTeam/Movecraft-Combat'
+        path: Movecraft-Combat
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Cache Maven packages
+      id: cache
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+    
+    # Run Spigot BuildTools for NMS if required
+    - name: Setup BuildTools
+      run: mkdir BuildTools && wget -O BuildTools/BuildTools.jar https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar
+    - name: Check 1.10.2
+      id: frostburn
+      run: test -f ~/.m2/repository/org/bukkit/craftbukkit/1.10.2-R0.1-SNAPSHOT/craftbukkit-1.10.2-R0.1-SNAPSHOT.jar && echo "::set-output name=sucess::true" || echo "::set-output name=sucess::false"
+    - name: Build 1.10.2
+      if: steps.frostburn.outputs.sucess != 'true'
+      run: cd BuildTools && java -jar BuildTools.jar --rev 1.10.2
+    - name: Check 1.11.2
+      id: exploration
+      run: test -f ~/.m2/repository/org/bukkit/craftbukkit/1.11.2-R0.1-SNAPSHOT/craftbukkit-1.11.2-R0.1-SNAPSHOT.jar && echo "::set-output name=sucess::true" || echo "::set-output name=sucess::false"
+    - name: Build 1.11.2
+      if: steps.exploration.outputs.sucess != 'true'
+      run: cd BuildTools && java -jar BuildTools.jar --rev 1.11.2
+    - name: Check 1.12.2
+      id: color
+      run: test -f ~/.m2/repository/org/bukkit/craftbukkit/1.12.2-R0.1-SNAPSHOT/craftbukkit-1.12.2-R0.1-SNAPSHOT.jar && echo "::set-output name=sucess::true" || echo "::set-output name=sucess::false"
+    - name: Build 1.12.2
+      if: steps.color.outputs.sucess != 'true'
+      run: cd BuildTools && java -jar BuildTools.jar --rev 1.12.2
+    
+    # Build Movecraft
+    - name: Build Movecraft
+      run:  mvn -B package -T 1C --file Movecraft/pom.xml
+
+    # Build Movecraft-Combat
+    - name: Build Movecraft-Combat
+      run:  mvn -B package -T 1C --file Movecraft-Combat/pom.xml
+
+    # Build Movecraft-WorldGuard
+    - name: Build Movecraft-WorldGuard
+      run: mvn -B package -T 1C --file Movecraft-WorldGuard/pom.xml
+
+    - name: Stage jar
+      run: mkdir staging && cp Movecraft-WorldGuard/target/Movecraft-WorldGuard.jar staging
+    - name: Rename jar
+      run: mv staging/Movecraft-WorldGuard*.jar staging/Movecraft-WorldGuard_$GITHUB_SHA.jar
+    - name: Upload jar
+      uses: actions/upload-artifact@v2
+      with:
+        name: Movecraft-WorldGuard_Dev-Build
+        path: staging/Movecraft-WorldGuard_*.jar
