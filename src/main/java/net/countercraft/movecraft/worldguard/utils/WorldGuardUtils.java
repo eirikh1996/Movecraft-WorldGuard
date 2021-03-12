@@ -140,6 +140,15 @@ public class WorldGuardUtils {
         region.setMembers(newOwners);
     }
 
+    public Set<String> getRegions(Location loc) {
+        ApplicableRegionSet regionSet = getApplicableRegions(loc);
+        HashSet<String> stringSet = new HashSet<>();
+        for(ProtectedRegion r : regionSet) {
+            stringSet.add(r.getId());
+        }
+        return stringSet;
+    }
+
     // Assault Features
 
     public boolean isInRegion(Location loc) {
@@ -191,6 +200,30 @@ public class WorldGuardUtils {
         return r.getMembers().getUniqueIds();
     }
 
+    public void setTNTAllow(String regionName, World w) {
+        ProtectedRegion r = getRegion(regionName, w);
+        if(r == null)
+            return;
+
+        r.setFlag(DefaultFlag.TNT, StateFlag.State.ALLOW);
+    }
+
+    public void setTNTDeny(String regionName, World w) {
+        ProtectedRegion r = getRegion(regionName, w);
+        if(r == null)
+            return;
+
+        r.setFlag(DefaultFlag.TNT, StateFlag.State.DENY);
+    }
+
+    public void clearOwners(String regionName, World w) {
+        ProtectedRegion r = getRegion(regionName, w);
+        if(r == null)
+            return;
+
+        r.getOwners().clear();
+    }
+
     @Nullable
     public String getRegionOwnerList(String regionName, World w) {
         ProtectedRegion r = getRegion(regionName, w);
@@ -222,6 +255,63 @@ public class WorldGuardUtils {
         return output.toString();
     }
 
+    public boolean addOwners(String regionName, World w, Set<String> owners) {
+        ProtectedRegion r = getRegion(regionName, w);
+        if(r == null)
+            return false;
+
+        DefaultDomain regionOwners = r.getOwners();
+
+        for(String ownerName : owners) {
+            if(ownerName.length() > 16) {
+                regionOwners.addPlayer(UUID.fromString(ownerName));
+            }
+            else {
+                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(ownerName);
+                if(offlinePlayer == null)
+                    continue;
+
+                regionOwners.addPlayer(offlinePlayer.getUniqueId());
+            }
+        }
+        return true;
+    }
+
+    public boolean isMember(String regionName, World w, Player p) {
+        ProtectedRegion r = getRegion(regionName, w);
+        if(r == null)
+            return false;
+
+        LocalPlayer lp = wgPlugin.wrapPlayer(p);
+        return r.isMember(lp) || r.isOwner(lp);
+    }
+
+    public boolean isTNTDenied(String regionName, World w) {
+        ProtectedRegion r = getRegion(regionName, w);
+        if(r == null)
+            return false;
+
+        return r.getFlag(DefaultFlag.TNT) == StateFlag.State.DENY;
+    }
+
+    @Nullable
+    public MovecraftLocation getMinLocation(String regionName, World w) {
+        ProtectedRegion r = getRegion(regionName, w);
+        if(r == null)
+            return null;
+
+        return vectorToMovecraftLocation(r.getMinimumPoint());
+    }
+
+    @Nullable
+    public MovecraftLocation getMaxLocation(String regionName, World w) {
+        ProtectedRegion r = getRegion(regionName, w);
+        if(r == null)
+            return null;
+
+        return vectorToMovecraftLocation(r.getMaximumPoint());
+    }
+
     @Nullable
     public Queue<Chunk> getChunksInRegion(String regionName, World w) {
         ProtectedRegion region = getRegion(regionName, w);
@@ -235,6 +325,23 @@ public class WorldGuardUtils {
             }
         }
         return chunks;
+    }
+
+    @Nullable
+    public IsInRegion getIsInRegion(String regionName, World w) {
+        ProtectedRegion r = getRegion(regionName, w);
+        if(r == null)
+            return null;
+
+        return new IsInRegion(r);
+    }
+
+    public boolean regionContains(String regionName, @NotNull Location l) {
+        ProtectedRegion r = getRegion(regionName, l.getWorld());
+        if(r == null)
+            return false;
+
+        return r.contains(l.getBlockX(), l.getBlockY(), l.getBlockZ());
     }
 
 
@@ -251,6 +358,11 @@ public class WorldGuardUtils {
     private ApplicableRegionSet getApplicableRegions(Location loc) {
         Vector vector = BukkitUtil.toVector(loc);
         return wgPlugin.getRegionManager(loc.getWorld()).getApplicableRegions(vector);
+    }
+
+    @NotNull
+    private MovecraftLocation vectorToMovecraftLocation(@NotNull Vector v) {
+        return new MovecraftLocation(v.getBlockX(), v.getBlockY(), v.getBlockZ());
     }
 
     /**
