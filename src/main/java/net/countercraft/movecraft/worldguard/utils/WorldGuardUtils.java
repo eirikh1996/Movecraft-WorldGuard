@@ -1,25 +1,24 @@
 package net.countercraft.movecraft.worldguard.utils;
 
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.bukkit.BukkitUtil;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.sk89q.worldguard.domains.DefaultDomain;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import net.countercraft.movecraft.MovecraftLocation;
+import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.utils.HitBox;
-import org.bukkit.Chunk;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 
 public class WorldGuardUtils {
     private WorldGuardPlugin wgPlugin;
@@ -116,20 +115,123 @@ public class WorldGuardUtils {
      * Movecraft-Warfare Features
      */
 
-    public boolean regionExists(String regionName, World world) {
-        return getRegion(regionName, world) != null;
+    // Siege Features
+
+    public boolean craftFullyInRegion(String regionName, World w, Craft craft) {
+        ProtectedRegion r = wgPlugin.getRegionManager(w).getRegion(regionName);
+        if(r == null)
+            return false;
+
+        for(MovecraftLocation ml : getHitboxCorners(craft.getHitBox())) {
+            if(!r.contains(ml.getX(), ml.getY(), ml.getZ()))
+                return false;
+        }
+        return true;
+    }
+
+    public void clearAndSetOwnership(String regionName, World w, UUID owner) {
+        ProtectedRegion region = wgPlugin.getRegionManager(w).getRegion(regionName);
+        if(region == null)
+            return;
+
+        DefaultDomain newOwners = new DefaultDomain();
+        newOwners.addPlayer(owner);
+        region.setOwners(newOwners);
+        region.setMembers(newOwners);
+    }
+
+    // Assault Features
+
+    public boolean isInRegion(Location loc) {
+        return getApplicableRegions(loc).size() != 0;
+    }
+
+    public boolean regionExists(String regionName, World w) {
+        return getRegion(regionName, w) != null;
+    }
+
+    public boolean ownsAssaultableRegion(Player p) {
+        LocalPlayer lp = wgPlugin.wrapPlayer(p);
+        for(ProtectedRegion r : wgPlugin.getRegionManager(p.getWorld()).getRegions().values()) {
+            if(r.isOwner(lp) && r.getFlag(DefaultFlag.TNT) == StateFlag.State.DENY)
+                return true;
+        }
+        return false;
     }
 
     @Nullable
-    public Queue<Chunk> getChunksInRegion(String regionName, World world) {
-        ProtectedRegion region = getRegion(regionName, world);
+    public String getAssaultableRegion(Location loc, HashSet<String> exclusions) {
+        for(ProtectedRegion r : getApplicableRegions(loc)) {
+            if(r.getFlag(DefaultFlag.TNT) != StateFlag.State.DENY || r.getOwners().size() == 0)
+                continue;
+
+            if(exclusions.contains(r.getId()))
+                continue;
+
+            return r.getId();
+        }
+        return null;
+    }
+
+    @Nullable
+    public Set<UUID> getUUIDOwners(String regionName, World w) {
+        ProtectedRegion r = getRegion(regionName, w);
+        if(r == null)
+            return null;
+
+        return r.getOwners().getUniqueIds();
+    }
+
+    @Nullable
+    public Set<UUID> getUUIDMembers(String regionName, World w) {
+        ProtectedRegion r = getRegion(regionName, w);
+        if(r == null)
+            return null;
+
+        return r.getMembers().getUniqueIds();
+    }
+
+    @Nullable
+    public String getRegionOwnerList(String regionName, World w) {
+        ProtectedRegion r = getRegion(regionName, w);
+        if(r == null)
+            return null;
+
+        StringBuilder output = new StringBuilder();
+        boolean first = true;
+        for(UUID uuid : r.getOwners().getUniqueIds()) {
+            if(!first)
+                output.append(", ");
+            else
+                first = false;
+
+            OfflinePlayer ofp = Bukkit.getOfflinePlayer(uuid);
+            if(ofp == null)
+                output.append(uuid);
+            else
+                output.append(ofp.getName());
+        }
+        for(String player : r.getOwners().getPlayers()) {
+            if(!first)
+                output.append(", ");
+            else
+                first = false;
+
+            output.append(player);
+        }
+        return output.toString();
+    }
+
+    @Nullable
+    public Queue<Chunk> getChunksInRegion(String regionName, World w) {
+        ProtectedRegion region = getRegion(regionName, w);
         if(region == null)
             return null;
 
         Queue<Chunk> chunks = new LinkedList<>();
         for(int x = (int) Math.floor(region.getMinimumPoint().getBlockX() / 16.0); x < Math.floor(region.getMaximumPoint().getBlockX() / 16.0) + 1; x++) {
             for(int z = (int) Math.floor(region.getMinimumPoint().getBlockZ() / 16.0); z < Math.floor(region.getMaximumPoint().getBlockZ() / 16.0) + 1; z++) {
-                chunks.add(world.getChunkAt(x, z));
+                chunks.add(w.getChunkAt(x, z));
             }
         }
         return chunks;
@@ -141,8 +243,8 @@ public class WorldGuardUtils {
      */
 
     @Nullable
-    private ProtectedRegion getRegion(String regionName, World world) {
-        return wgPlugin.getRegionManager(world).getRegion(regionName);
+    private ProtectedRegion getRegion(String regionName, World w) {
+        return wgPlugin.getRegionManager(w).getRegion(regionName);
     }
 
     @NotNull
