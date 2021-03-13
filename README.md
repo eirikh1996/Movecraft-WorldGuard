@@ -1,4 +1,5 @@
 # Movecraft-WorldGuard
+![WorldGuard](https://github.com/APDevTeam/Movecraft-WorldGuard/actions/workflows/maven.yml/badge.svg)
 
 Home of the code for the following features:
  - WorldGuard plugin integration
