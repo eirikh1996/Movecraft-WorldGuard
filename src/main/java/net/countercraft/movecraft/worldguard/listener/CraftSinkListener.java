@@ -14,6 +14,9 @@ public class CraftSinkListener implements Listener {
         if(!Config.WorldGuardBlockSinkOnPVPPerm)
             return;
 
+        if(e.getCraft().getHitBox().isEmpty())
+            return;
+
         if(MovecraftWorldGuard.getInstance().getWGUtils().isPVPAllowed(e.getCraft().getW(), e.getCraft().getHitBox()))
             return;
 
