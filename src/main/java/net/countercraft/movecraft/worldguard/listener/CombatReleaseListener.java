@@ -8,6 +8,9 @@ import org.bukkit.event.Listener;
 public class CombatReleaseListener implements Listener {
     @EventHandler
     public void onCombatRelease(CombatReleaseEvent e) {
+        if(e.getCraft().getHitBox().isEmpty())
+            return;
+
         // If in a region with TNT or PVP denied, cancel the combat release
         if(!MovecraftWorldGuard.getInstance().getWGUtils().isPVPAllowed(e.getCraft().getW(), e.getCraft().getHitBox()))
             e.setCancelled(true);

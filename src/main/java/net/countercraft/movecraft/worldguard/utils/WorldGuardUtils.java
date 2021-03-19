@@ -152,7 +152,7 @@ public class WorldGuardUtils {
     // Assault Features
 
     public boolean isInRegion(Location loc) {
-        return getApplicableRegions(loc).size() != 0;
+        return getApplicableRegions(loc).size() > 0;
     }
 
     public boolean regionExists(String regionName, World w) {

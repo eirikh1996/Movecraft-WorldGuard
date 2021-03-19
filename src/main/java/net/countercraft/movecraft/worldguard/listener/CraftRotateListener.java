@@ -14,7 +14,7 @@ public class CraftRotateListener implements Listener {
         if(!Config.WorldGuardBlockMoveOnBuildPerm)
             return;
 
-        if(e.getCraft().getNotificationPlayer() == null)
+        if(e.getCraft().getNotificationPlayer() == null || e.getNewHitBox().isEmpty())
             return;
 
         if(MovecraftWorldGuard.getInstance().getWGUtils().canRotate(e.getCraft().getNotificationPlayer(), e.getCraft().getW(), e.getNewHitBox()))

@@ -6,7 +6,7 @@
 
     <groupId>net.countercraft.movecraft.worldguard</groupId>
     <artifactId>Movecraft-WorldGuard</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
     <packaging>jar</packaging>
 
     <name>Movecraft-WorldGuard</name>
@@ -101,11 +101,18 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/../MC-Combat/target/Movecraft-Combat.jar</systemPath>
         </dependency>
+        <!--WorldEdit-->
+        <dependency>
+            <groupId>com.sk89q.worldedit</groupId>
+            <artifactId>worldedit-core</artifactId>
+            <version>6.1.4-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
         <!--WorldGuard-->
         <dependency>
-            <groupId>com.sk89q</groupId>
-            <artifactId>worldguard</artifactId>
-            <version>6.1</version>
+            <groupId>com.sk89q.worldguard</groupId>
+            <artifactId>worldguard-legacy</artifactId>
+            <version>6.2</version>
             <scope>provided</scope>
         </dependency>
         <!--Annotations-->
